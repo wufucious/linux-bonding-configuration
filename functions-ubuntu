@@ -1,0 +1,37 @@
+#!/bin/sh
+
+#Config Ubuntu NIC
+config_ubuntu_nic()
+{
+cat << EOF >> /etc/network/interfaces
+
+auto bond${bond0}
+iface bond${bond0} inet dhcp
+bond-mode ${bondip0mode}
+bond-miimon 100
+bond-slaves none
+
+auto ${nic0}
+iface ${nic0} inet manual
+bond-master bond${bond0}
+bond-primary bond${bond0}
+
+auto ${nic1}
+iface ${nic1} inet manual
+bond-master bond${bond0}
+
+auto bond${bond0}.${bondip1vlanid}
+iface bond${bond0}.${bondip1vlanid} inet static
+address ${bondip1}
+netmask ${bondip1netmask}
+gateway ${bondip1gateway}
+vlan-raw-device bond${bond0}
+EOF
+}
+
+start_ubuntu_nic()
+{
+ifdown ${nic0}
+ifdown ${nic1}
+ifup -a --exclude=lo
+}

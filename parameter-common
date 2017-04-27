@@ -1,0 +1,18 @@
+#!/bin/sh
+
+#bond0.vlan0 = business network
+bond0="0"
+bondip0mode="1"
+#bondip0vlanid="NEED_MODIFY_BUSINESS_NETWORK_VLAN_ID"
+#bondip0="NEED_MODIFY_BUSINESS_NETWORK_IP"
+#bondip0netmask="NEED_MODIFY_BUSINESS_NETWORK_NETMASK"
+#bondip0gateway="NEED_MODIFY_BUSINESS_NETWORK_GATEWAY"
+bondip0mac0="NEED_MODIFY_MAC1"
+bondip0mac1="NEED_MODIFY_MAC2"
+
+#bond0.vlan1= storage network
+bondip1vlanid="NEED_MODIFY_STORAGE_NETWORK_VLAN_ID"
+bondip1="NEED_MODIFY_STORAGE_NETWORK_IP"
+bondip1netmask="NEED_MODIFY_STORAGE_NETWORK_NETMASK"
+bondip1gateway="NEED_MODIFY_STORAGE_NETWORK_GATEWAY"
+configpath="/tmp/setip/"

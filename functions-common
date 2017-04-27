@@ -1,0 +1,28 @@
+#!/bin/sh
+
+mkdir $configpath
+distro_check()
+{
+cat /etc/redhat-release
+if [ $? == "0" ];then
+    distro="CentOS"
+    cat /etc/redhat-release|grep 6
+    if [ $? == "0" ];then
+        version="6"
+    else
+        version="Other"
+    fi
+fi
+
+cat /etc/lsb-release|grep Ubuntu
+if [ $? == "0" ];then
+    distro="Ubuntu"
+    cat /etc/lsb-release|grep Ubuntu|grep 14
+    if [ $? == "0" ];then
+        version="14"
+    else
+        version="other"
+        echo "todo for ubuntu 12"
+    fi
+fi
+}
