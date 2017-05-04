@@ -1,37 +1,148 @@
 #!/bin/sh
 
-#Config Ubuntu NIC
-config_ubuntu_nic()
-{
-cat << EOF >> /etc/network/interfaces
+echo "Ubuntu functions are loaded"
 
-auto bond${bond0}
-iface bond${bond0} inet dhcp
-bond-mode ${bondip0mode}
+disable_network_manager()
+{
+apt-get purge network-manager
+
+if [ "$?" -ne 0 ]; then
+	echo "apt not available"
+	exit -1
+else
+	echo "network manager not installed or disabled"
+fi
+}
+
+bond_initial()
+{
+apt-get install vlan
+apt-get install ifenslave
+}
+
+start_nic()
+{
+service networking restart
+}
+
+config_nic()
+{ 
+
+cp /etc/network/interfaces /etc/network/interfaces.bak
+if [ $SCRIPT_VERSION == "2017-05-01-cmcc-public-cloud" ]; then
+cat << EOF > /etc/network/interfaces
+
+# The loopback network interface
+auto lo
+iface lo inet loopback
+
+auto ${nic_0}
+iface ${nic_0} inet manual
+bond-master bond0
+bond-primary ${nic_0}
+
+auto ${nic_1}
+iface ${nic_1} inet manual
+bond-master bond0
+
+auto ${nic_2}
+iface ${nic_2} inet manual
+bond-master bond1
+
+auto ${nic_3}
+iface ${nic_3} inet manual
+bond-master bond1
+
+auto ${nic_4}
+iface ${nic_4} inet manual
+bond-master bond2
+
+auto ${nic_5}
+iface ${nic_5} inet manual 
+bond-master bond2
+
+auto bond0
+iface bond0 inet static
+address ${manage_ip}
+gateway ${manage_gateway}
+netmask ${manage_netmask}
+bond-mode 1
 bond-miimon 100
 bond-slaves none
 
-auto ${nic0}
-iface ${nic0} inet manual
-bond-master bond${bond0}
-bond-primary bond${bond0}
+auto bond1
+iface bond1 inet static
+address ${storage_ip}
+gateway ${storage_gateway}
+netmask ${storage_netmask}
+bond-mode 4
+bond-miimon 100
+bond-lacp-rate 1
+bond-slaves ${nic_2} ${nic_3}
 
-auto ${nic1}
-iface ${nic1} inet manual
-bond-master bond${bond0}
+auto bond2
+iface bond2 inet dhcp
+bond-mode 4
+bond-miimon 100
+bond-lacp-rate 1
+bond-slaves ${nic_4} ${nic_5}
 
-auto bond${bond0}.${bondip1vlanid}
-iface bond${bond0}.${bondip1vlanid} inet static
-address ${bondip1}
-netmask ${bondip1netmask}
-gateway ${bondip1gateway}
-vlan-raw-device bond${bond0}
 EOF
-}
 
-start_ubuntu_nic()
-{
-ifdown ${nic0}
-ifdown ${nic1}
-ifup -a --exclude=lo
+elif [ $SCRIPT_VERSION == "2017-07-01-cmcc-private-cloud" ]; then
+
+cat << EOF > /etc/network/interfaces
+
+# The loopback network interface
+auto lo
+iface lo inet loopback
+
+auto ${nic_0}
+iface ${nic_0} inet manual
+bond-master bond0
+bond-primary ${nic_0}
+
+auto ${nic_1}
+iface ${nic_1} inet manual
+bond-master bond0
+
+auto ${nic_2}
+iface ${nic_2} inet manual
+bond-master bond1
+
+auto ${nic_3}
+iface ${nic_3} inet manual
+bond-master bond1
+
+auto bond0
+iface bond0 inet static
+address ${manage_ip}
+gateway ${manage_gateway}
+netmask ${manage_netmask}
+bond-mode 1
+bond-miimon 100
+bond-slaves none
+
+auto bond1
+iface bond1 inet dhcp
+bond-mode 4
+bond-miimon 100
+bond-lacp-rate 1
+bond-slaves ${nic_2} ${nic_3}
+
+auto bond1.${storage_vlanid}
+iface bond1.${storage_vlanid} inet static
+address ${storage_ip}
+gateway ${storage_gateway}
+netmask ${storage_netmask}
+vlan-raw-device bond1
+
+EOF
+
+else
+
+echo "unsupport SCRIPT_VERSION"; exit -1
+
+fi
+
 }

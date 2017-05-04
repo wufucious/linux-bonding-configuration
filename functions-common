@@ -1,28 +1,21 @@
 #!/bin/sh
 
-mkdir $configpath
+echo "common function are loaded"
+
 distro_check()
 {
-cat /etc/redhat-release
-if [ $? == "0" ];then
-    distro="CentOS"
-    cat /etc/redhat-release|grep 6
+    cat /etc/redhat-release &> /dev/null
     if [ $? == "0" ];then
-        version="6"
-    else
-        version="Other"
+        distro="CentOS"
+        version=$(cat /etc/redhat-release|awk '{print $4}'|cut -d '.' -f1)
     fi
-fi
 
-cat /etc/lsb-release|grep Ubuntu
-if [ $? == "0" ];then
-    distro="Ubuntu"
-    cat /etc/lsb-release|grep Ubuntu|grep 14
+    cat /etc/lsb-release|grep Ubuntu &> /dev/null
     if [ $? == "0" ];then
-        version="14"
-    else
-        version="other"
-        echo "todo for ubuntu 12"
+        distro="Ubuntu"
+        version=$(cat /etc/lsb-release|grep RELEASE|cut -d '=' -f2|cut -d '.' -f1)
     fi
-fi
+
+    echo "current linux is $distro $version"
 }
+

@@ -1,28 +1,20 @@
 #!/bin/sh
 
-set -x
-#bond0.vlan0 = business network
-bond0="0"
-bondip0mode="1"
-#bondip0vlanid="NEED_MODIFY_BUSINESS_NETWORK_VLAN_ID"
-#bondip0="NEED_MODIFY_BUSINESS_NETWORK_IP"
-#bondip0netmask="NEED_MODIFY_BUSINESS_NETWORK_NETMASK"
-#bondip0gateway="NEED_MODIFY_BUSINESS_NETWORK_GATEWAY"
-bondip0mac0="NEED_MODIFY_MAC1"
-bondip0mac1="NEED_MODIFY_MAC2"
 
-#bond0.vlan1= storage network
-bondip1vlanid="NEED_MODIFY_STORAGE_NETWORK_VLAN_ID"
-bondip1="NEED_MODIFY_STORAGE_NETWORK_IP"
-bondip1netmask="NEED_MODIFY_STORAGE_NETWORK_NETMASK"
-bondip1gateway="NEED_MODIFY_STORAGE_NETWORK_GATEWAY"
-configpath="/tmp/setip/"
+echo "CentOS functions are loaded"
 
-distro="CentOS"
-version="6"
+disable_network_manager()
+{
+yum remove NetworkManager
 
-#Config CentOS NIC function
-config_centos_nic()
+if [ $? -ne "0" ]; then
+	echo "yum not available"
+	exit -1
+else
+	echo "network manager not installed or disabled"
+fi
+}
+config_nic()
 {
 cat << EOF > /etc/sysconfig/network-scripts/ifcfg-bond${bond0}
 DEVICE=bond${bond0}
@@ -69,37 +61,7 @@ EOF
 #config storage network end
 }
 
-
-#Config Ubuntu NIC
-config_ubuntu_nic()
-{
-cat << EOF >> /etc/network/interfaces
-
-auto bond${bond0}
-iface bond${bond0} inet dhcp
-bond-mode ${bondip0mode}
-bond-miimon 100
-bond-slaves none
-
-auto ${nic0}
-iface ${nic0} inet manual
-bond-master bond${bond0}
-bond-primary bond${bond0}
-
-auto ${nic1}
-iface ${nic1} inet manual
-bond-master bond${bond0}
-
-auto bond${bond0}.${bondip1vlanid}
-iface bond${bond0}.${bondip1vlanid} inet static
-address ${bondip1}
-netmask ${bondip1netmask}
-gateway ${bondip1gateway}
-vlan-raw-device bond${bond0}
-EOF
-}
-
-start_centos_nic()
+start_nic()
 {
 #ifdown ${nic0}
 ifup ${nic0}
@@ -111,78 +73,3 @@ ifup bond${bond0}
 ifup bond${bond0}.${bondip1vlanid}
 #service network restart
 }
-
-start_ubuntu_nic()
-{
-ifdown ${nic0}
-ifdown ${nic1}
-ifup -a --exclude=lo
-}
-
-mkdir $configpath
-
-cat /etc/redhat-release
-if [ $? == "0" ];then
-    distro="CentOS"
-    cat /etc/redhat-release|grep 6
-    if [ $? == "0" ];then
-        version="6"
-        ifconfig -a|grep -i "${bondip0mac0}"|grep Link|sed -n "1P"|awk {'print $1'} > ${configpath}nic0
-        ifconfig -a|grep -i "${bondip0mac1}"|grep Link|sed -n "1P"|awk {'print $1'} > ${configpath}nic1
-    else
-        version="Other"
-        ifconfig -a|grep -iB 5 "${bondip0mac0}"|grep flags|cut -d ':' -f 1 > ${configpath}nic0
-        ifconfig -a|grep -iB 5 ${bondip0mac1}|grep flags|cut -d ":" -f 1 > ${configpath}nic1
-    fi
-fi
-
-cat /etc/lsb-release|grep Ubuntu
-if [ $? == "0" ];then
-    distro="Ubuntu"
-    cat /etc/lsb-release|grep Ubuntu|grep 14
-    if [ $? == "0" ];then
-        version="14"
-        ifconfig -a|grep -i "${bondip0mac0}"|grep Link|sed -n "1P"|awk {'print $1'} > ${configpath}nic0
-        ifconfig -a|grep -i "${bondip0mac1}"|grep Link|sed -n "1P"|awk {'print $1'} > ${configpath}nic1
-    else
-        version="other"
-        echo "todo for ubuntu 12"
-        ifconfig -a|grep -i "${bondip0mac0}"|grep Link|sed -n "1P"|awk {'print $1'} > ${configpath}nic0
-        ifconfig -a|grep -i "${bondip0mac1}"|grep Link|sed -n "1P"|awk {'print $1'} > ${configpath}nic1
-    fi
-fi
-
-nic0=`cat ${configpath}nic0`
-nic1=`cat ${configpath}nic1`
-
-file1="${configpath}nic0"
-file2="${configpath}nic1"
-
-if [ ! -s $file1 ];then
-    echo "mac address1 is wrong"
-    exit -1
-fi
-
-if [ ! -s $file2 ];then
-    echo "mac address2 is wrong"
-    exit -1
-fi
-
-echo $nic0
-echo $nic1
-
-systemctl disable NetworkManager
-systemctl stop NetworkManager
-modprobe --first-time bonding
-modinfo bonding
-
-##config nics and start nics
-if [ $distro == "CentOS" ];then
-    config_centos_nic
-    start_centos_nic
-elif [ $distro == "Ubuntu" ];then
-    config_ubuntu_nic
-    start_ubuntu_nic
-fi
-
-set +x
