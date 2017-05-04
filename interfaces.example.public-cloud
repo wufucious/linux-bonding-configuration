@@ -1,0 +1,71 @@
+# This file describes the network interfaces available on your system
+# and how to activate them. For more information, see interfaces(5).
+
+# The loopback network interface
+auto lo
+iface lo inet loopback
+
+# The primary network interface
+
+auto eth0
+iface eth0 inet dhcp
+
+#eth1 configuration
+auto eth1
+iface eth1 inet manual
+bond-master bond0
+bond-primary eth1
+
+#eth2 configuration
+auto eth2
+iface eth2 inet manual
+bond-master bond0
+
+#eth2 configuration
+auto eth3
+iface eth3 inet manual
+bond-master bond1
+
+#eth2 configuration
+auto eth4
+iface eth4 inet manual
+bond-master bond1
+
+#eth2 configuration
+auto eth5
+iface eth5 inet manual
+bond-master bond2
+
+#eth2 configuration
+auto eth6
+iface eth6 inet manual 
+bond-master bond2
+
+# Bonding eth1 & eth2 to create bond0 NIC
+auto bond0
+iface bond0 inet static
+address 192.168.10.200
+gateway 192.168.10.1
+netmask 255.255.255.0
+bond-mode 1
+bond-miimon 100
+bond-slaves none
+
+# Bonding eth3 & eth4 to create bond1 NIC
+auto bond1
+iface bond1 inet static
+address 192.168.10.233
+gateway 192.168.10.1
+netmask 255.255.255.0
+bond-mode 4
+bond-miimon 100
+bond-lacp-rate 1
+bond-slaves eth3 eth4
+
+# Bonding eth3 & eth4 to create bond2 NIC
+auto bond2
+iface bond2 inet dhcp
+bond-mode 4
+bond-miimon 100
+bond-lacp-rate 1
+bond-slaves eth5 eth6
