@@ -16,14 +16,37 @@ fi
 
 bond_initial()
 {
-apt-get install vlan
-apt-get install ifenslave
+apt-get install vlan ifenslave
+
+modprobe bonding
+
+if [ $? -ne 0 ] ; then 
+echo "cant install package"; exit -1
+fi
+
+cat /etc/modules | grep bonding >> /dev/null
+if [ $? -ne 0 ] ; then
+echo "bonding" >> /etc/modules
+fi 
 }
 
 start_nic()
 {
-service networking restart
+if [ $SCRIPT_VERSION == "2017-05-01-cmcc-public-cloud" ]; then
+ifup bond0&
+ifup ${nic_0} && ifup ${nic_1}
+ifup bond1& 
+ifup ${nic_2} && ifup ${nic_3}
+ifup bond2& 
+ifup ${nic_4} && ifup ${nic_5}
+elif [ $SCRIPT_VERSION == "2017-07-01-cmcc-private-cloud" ]; then
+ifup bond0&
+ifup ${nic_0} && ifup ${nic_1}
+ifup bond1& 
+ifup ${nic_2} && ifup ${nic_3}
+fi
 }
+
 
 config_nic()
 { 

@@ -1,4 +1,5 @@
 #!/bin/bash
+#SCRIPT_VERSION="2017-07-01-cmcc-private-cloud"
 SCRIPT_VERSION="2017-05-01-cmcc-public-cloud"
 
 if [ `whoami` = "root" ];then
@@ -29,6 +30,8 @@ fi
 
 disable_network_manager
 
+bond_initial
+
 nic_0=$(ip -o link show | grep "$manage_mac_1" | awk '{print $2}'| cut -d ':' -f1)
 nic_1=$(ip -o link show | grep "$manage_mac_2" | awk '{print $2}'| cut -d ':' -f1)
 nic_2=$(ip -o link show | grep "$storage_mac_1" | awk '{print $2}'| cut -d ':' -f1)
@@ -41,4 +44,4 @@ if [[ -z "$nic_0" || -z "$nic_1" || -z "$nic_2" || -z "$nic_3" || -z "$nic_4" ||
 fi
 
 config_nic
-#start_nic
+start_nic
