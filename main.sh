@@ -1,6 +1,6 @@
 #!/bin/bash
-#SCRIPT_VERSION="2017-07-01-cmcc-private-cloud"
-SCRIPT_VERSION="2017-05-01-cmcc-public-cloud"
+SCRIPT_VERSION="2017-07-01-cmcc-private-cloud"
+#SCRIPT_VERSION="2017-05-01-cmcc-public-cloud"
 
 if [ `whoami` = "root" ];then
 echo "user:root"
@@ -10,7 +10,7 @@ exit
 fi
 
 echo "network initializaiton start"
-# set -x
+set -x
 
 source parameters-common-debug
 #source parameters-common

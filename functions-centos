@@ -14,62 +14,220 @@ else
 	echo "network manager not installed or disabled"
 fi
 }
+
+
+bond_initial()
+{
+echo "bond initialized"
+}
+
 config_nic()
 {
-cat << EOF > /etc/sysconfig/network-scripts/ifcfg-bond${bond0}
-DEVICE=bond${bond0}
-NAME=bond${bond0}
+if [ $SCRIPT_VERSION == "2017-05-01-cmcc-public-cloud" ]; then
+
+##config manage network
+touch /etc/sysconfig/network-scripts/ifcfg-${nic_0}
+cat << EOF > /etc/sysconfig/network-scripts/ifcfg-${nic_0}
+DEVICE=${nic_0}
+NAME=bond0-slave-${nic_0}
+TYPE=Ethernet
+BOOTPROTO=none
+ONBOOT=yes
+MASTER=bond0
+SLAVE=yes
+EOF
+
+touch /etc/sysconfig/network-scripts/ifcfg-${nic_1}
+cat << EOF > /etc/sysconfig/network-scripts/ifcfg-${nic_1}
+DEVICE=${nic_1}
+NAME=bond0-slave-${nic_1}
+TYPE=Ethernet
+BOOTPROTO=none
+ONBOOT=yes
+MASTER=bond0
+SLAVE=yes
+EOF
+
+touch /etc/sysconfig/network-scripts/ifcfg-bond0
+cat << EOF > /etc/sysconfig/network-scripts/ifcfg-bond0
+DEVICE=bond0
+NAME=bond0
+TYPE=Bond
+BONDING_MASTER=yes
+IPADDR=${manage_ip}
+GATEWAY=${manage_gateway}
+NETMASK=${manage_netmask}
+ONBOOT=yes
+BOOTPROTO=none
+BONDING_OPTS="mode=1 miimon=100"
+EOF
+
+##config storage network
+touch /etc/sysconfig/network-scripts/ifcfg-${nic_2}
+cat << EOF > /etc/sysconfig/network-scripts/ifcfg-${nic_2}
+DEVICE=${nic_2}
+NAME=bond0-slave-${nic_2}
+TYPE=Ethernet
+BOOTPROTO=none
+ONBOOT=yes
+MASTER=bond1
+SLAVE=yes
+EOF
+
+touch /etc/sysconfig/network-scripts/ifcfg-${nic_3}
+cat << EOF > /etc/sysconfig/network-scripts/ifcfg-${nic_3}
+DEVICE=${nic_3}
+NAME=bond0-slave-${nic_3}
+TYPE=Ethernet
+BOOTPROTO=none
+ONBOOT=yes
+MASTER=bond1
+SLAVE=yes
+EOF
+
+touch /etc/sysconfig/network-scripts/ifcfg-bond1
+cat << EOF > /etc/sysconfig/network-scripts/ifcfg-bond1
+DEVICE=bond1
+NAME=bond1
+TYPE=Bond
+BONDING_MASTER=yes
+IPADDR=${storage_ip}
+GATEWAY=${storage_gateway}
+NETMASK=${storage_netmask}
+ONBOOT=yes
+BOOTPROTO=none
+BONDING_OPTS="mode=4 miimon=100"
+EOF
+
+##config business network
+touch /etc/sysconfig/network-scripts/ifcfg-${nic_4}
+cat << EOF > /etc/sysconfig/network-scripts/ifcfg-${nic_4}
+DEVICE=${nic_4}
+NAME=bond0-slave-${nic_4}
+TYPE=Ethernet
+BOOTPROTO=none
+ONBOOT=yes
+MASTER=bond2
+SLAVE=yes
+EOF
+
+touch /etc/sysconfig/network-scripts/ifcfg-${nic_5}
+cat << EOF > /etc/sysconfig/network-scripts/ifcfg-${nic_5}
+DEVICE=${nic_5}
+NAME=bond0-slave-${nic_5}
+TYPE=Ethernet
+BOOTPROTO=none
+ONBOOT=yes
+MASTER=bond2
+SLAVE=yes
+EOF
+
+touch /etc/sysconfig/network-scripts/ifcfg-bond2
+cat << EOF > /etc/sysconfig/network-scripts/ifcfg-bond2
+DEVICE=bond2
+NAME=bond2
 TYPE=Bond
 BONDING_MASTER=yes
 ONBOOT=yes
 BOOTPROTO=dhcp
-BONDING_OPTS="miimon=100 mode=$bondip0mode"
+BONDING_OPTS="mode=4 miimon=100"
 EOF
 
-cat << EOF > /etc/sysconfig/network-scripts/ifcfg-${nic0}
-DEVICE=${nic0}
-NAME=bond${bond0}-slave
+elif [ $SCRIPT_VERSION == "2017-07-01-cmcc-private-cloud" ]; then
+
+##config manage network
+touch /etc/sysconfig/network-scripts/ifcfg-${nic_0}
+cat << EOF > /etc/sysconfig/network-scripts/ifcfg-${nic_0}
+DEVICE=${nic_0}
+NAME=bond0-slave-${nic_0}
 TYPE=Ethernet
 BOOTPROTO=none
 ONBOOT=yes
-MASTER=bond${bond0}
+MASTER=bond0
 SLAVE=yes
 EOF
 
-cat << EOF > /etc/sysconfig/network-scripts/ifcfg-${nic1}
-DEVICE=${nic1}
-NAME=bond${bond0}-slave
+touch /etc/sysconfig/network-scripts/ifcfg-${nic_1}
+cat << EOF > /etc/sysconfig/network-scripts/ifcfg-${nic_1}
+DEVICE=${nic_1}
+NAME=bond0-slave-${nic_1}
 TYPE=Ethernet
 BOOTPROTO=none
 ONBOOT=yes
-MASTER=bond${bond0}
+MASTER=bond0
 SLAVE=yes
 EOF
-#config businese network end
 
-#config storage network start
-cat << EOF > /etc/sysconfig/network-scripts/ifcfg-bond${bond0}.${bondip1vlanid}
-DEVICE=bond${bond0}.${bondip1vlanid}
-NAME=bond${bond0}.${bondip1vlanid}
+touch /etc/sysconfig/network-scripts/ifcfg-bond0
+cat << EOF > /etc/sysconfig/network-scripts/ifcfg-bond0
+DEVICE=bond0
+NAME=bond0
+TYPE=Bond
+BONDING_MASTER=yes
+IPADDR=${manage_ip}
+GATEWAY=${manage_gateway}
+NETMASK=${manage_netmask}
 ONBOOT=yes
 BOOTPROTO=none
-IPADDR=${bondip1}
-NETMASK=${bondip1netmask}
-#GATEWAY=${bondip1gateway}
+BONDING_OPTS="mode=1 miimon=100"
+EOF
+
+##config business network
+touch /etc/sysconfig/network-scripts/ifcfg-${nic_2}
+cat << EOF > /etc/sysconfig/network-scripts/ifcfg-${nic_2}
+DEVICE=${nic_2}
+NAME=bond0-slave-${nic_2}
+TYPE=Ethernet
+BOOTPROTO=none
+ONBOOT=yes
+MASTER=bond1
+SLAVE=yes
+EOF
+
+touch /etc/sysconfig/network-scripts/ifcfg-${nic_3}
+cat << EOF > /etc/sysconfig/network-scripts/ifcfg-${nic_3}
+DEVICE=${nic_3}
+NAME=bond0-slave-${nic_3}
+TYPE=Ethernet
+BOOTPROTO=none
+ONBOOT=yes
+MASTER=bond1
+SLAVE=yes
+EOF
+
+touch /etc/sysconfig/network-scripts/ifcfg-bond1
+cat << EOF > /etc/sysconfig/network-scripts/ifcfg-bond1
+DEVICE=bond1
+NAME=bond1
+TYPE=Bond
+BONDING_MASTER=yes
+ONBOOT=yes
+BOOTPROTO=dhcp
+BONDING_OPTS="mode=4 miimon=100"
+EOF
+
+##config storage network
+touch /etc/sysconfig/network-scripts/ifcfg-bond1.${storage_vlanid}
+cat << EOF > /etc/sysconfig/network-scripts/ifcfg-bond1.${storage_vlanid}
+DEVICE=bond1.${storage_vlanid}
+NAME=bond1.${storage_vlanid}
+BOOTPROTO=none
+ONPARENT=yes
+IPADDR=${storage_ip}
+GATEWAY=${storage_gateway}
+NETMASK=${storage_netmask}
 VLAN=yes
+ONBOOT=yes
 EOF
-#config storage network end
+
+else
+
+echo "unsupport SCRIPT_VERSION"; exit -1
+
+fi
 }
 
 start_nic()
 {
-#ifdown ${nic0}
-ifup ${nic0}
-#ifdown ${nic1}
-ifup ${nic1}
-#ifdown bond${bond0}
-ifup bond${bond0}
-#ifdown bond${bond0}.${bondip1vlanid}
-ifup bond${bond0}.${bondip1vlanid}
-#service network restart
+service network restart
 }
