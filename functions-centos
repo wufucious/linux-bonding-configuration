@@ -62,7 +62,8 @@ BOOTPROTO=none
 BONDING_OPTS="mode=1 miimon=100"
 EOF
 
-##config storage network
+
+##config business network
 touch /etc/sysconfig/network-scripts/ifcfg-${nic_2}
 cat << EOF > /etc/sysconfig/network-scripts/ifcfg-${nic_2}
 DEVICE=${nic_2}
@@ -91,15 +92,12 @@ DEVICE=bond1
 NAME=bond1
 TYPE=Bond
 BONDING_MASTER=yes
-IPADDR=${storage_ip}
-GATEWAY=${storage_gateway}
-NETMASK=${storage_netmask}
 ONBOOT=yes
-BOOTPROTO=none
+BOOTPROTO=dhcp
 BONDING_OPTS="mode=4 miimon=100"
 EOF
 
-##config business network
+##config storage network
 touch /etc/sysconfig/network-scripts/ifcfg-${nic_4}
 cat << EOF > /etc/sysconfig/network-scripts/ifcfg-${nic_4}
 DEVICE=${nic_4}
@@ -128,11 +126,13 @@ DEVICE=bond2
 NAME=bond2
 TYPE=Bond
 BONDING_MASTER=yes
+IPADDR=${storage_ip}
+GATEWAY=${storage_gateway}
+NETMASK=${storage_netmask}
 ONBOOT=yes
-BOOTPROTO=dhcp
+BOOTPROTO=none
 BONDING_OPTS="mode=4 miimon=100"
 EOF
-
 elif [ $SCRIPT_VERSION == "2017-07-01-cmcc-private-cloud" ]; then
 
 ##config manage network

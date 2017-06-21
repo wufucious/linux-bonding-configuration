@@ -94,17 +94,17 @@ bond-miimon 100
 bond-slaves none
 
 auto bond1
-iface bond1 inet static
-address ${storage_ip}
-gateway ${storage_gateway}
-netmask ${storage_netmask}
+iface bond1 inet dhcp
 bond-mode 4
 bond-miimon 100
 bond-lacp-rate 1
 bond-slaves ${nic_2} ${nic_3}
 
 auto bond2
-iface bond2 inet dhcp
+iface bond2 inet static
+address ${storage_ip}
+gateway ${storage_gateway}
+netmask ${storage_netmask}
 bond-mode 4
 bond-miimon 100
 bond-lacp-rate 1
