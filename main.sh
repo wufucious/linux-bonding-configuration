@@ -34,13 +34,22 @@ bond_initial
 
 nic_0=$(ip -o link show | grep "$manage_mac_1" | awk '{print $2}'| cut -d ':' -f1)
 nic_1=$(ip -o link show | grep "$manage_mac_2" | awk '{print $2}'| cut -d ':' -f1)
+if [[ -z "$nic_0" || -z "$nic_1" ]]; then
+	echo "one manage nic not found"
+	exit -1
+fi
+
 nic_2=$(ip -o link show | grep "$business_mac_1" | awk '{print $2}'| cut -d ':' -f1)
 nic_3=$(ip -o link show | grep "$business_mac_2" | awk '{print $2}'| cut -d ':' -f1)
+if [[ -z "$nic_2" || -z "$nic_3" ]]; then
+	echo "one business nic not found"
+	exit -1
+fi
+
 nic_4=$(ip -o link show | grep "$storage_mac_1" | awk '{print $2}'| cut -d ':' -f1)
 nic_5=$(ip -o link show | grep "$storage_mac_2" | awk '{print $2}'| cut -d ':' -f1)
-
-if [[ -z "$nic_0" || -z "$nic_1" || -z "$nic_2" || -z "$nic_3" || -z "$nic_4" || -z "$nic_5" ]]; then
-	echo "one nic not found"
+if [[ -z "$nic_4" || -z "$nic_5" ]]; then
+	echo "one storage nic not found"
 	exit -1
 fi
 
